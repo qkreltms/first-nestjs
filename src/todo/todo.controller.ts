@@ -1,51 +1,49 @@
-import { Body, Controller, Delete, Get, Post, Put } from '@nestjs/common';
-import { TypeTodoDTO } from 'src/todo/todo.dto';
-import { CheckTodo, TodoMapper } from './util';
-
-let todos: TypeTodoDTO[] = [
-  {
-    id: '1',
-    title: 'Generate apps',
-    status: 'DONE',
-  },
-];
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { Todo } from 'src/todo/todo.entity';
+import { TodoService } from 'src/todo/todo.service';
+import { CheckTodo } from './util';
 
 @Controller('todo')
 export class TodoController {
+  constructor(private todoService: TodoService) {}
+
   @Get()
-  getTodos(): TypeTodoDTO[] {
-    return todos;
+  getTodos() {
+    return this.todoService.findAll();
   }
 
   @Post()
   @CheckTodo()
-  createTodo(@Body() todo: TypeTodoDTO): TypeTodoDTO[] {
-    const newTodo: TypeTodoDTO = {
-      id: (todos.length + 1).toString(),
-      ...todo,
-    };
-    todos = [...todos, newTodo];
-    return todos;
+  createTodo(@Body() todo: Todo) {
+    return this.todoService.create(todo);
   }
 
   @Put()
   @CheckTodo()
-  updateTodo(@Body() todo: TypeTodoDTO): TypeTodoDTO[] {
-    todos = todos.map((cur) => {
-      const id = `${todo.id}`;
-      if (cur.id === id) {
-        cur = { ...todo, id };
-      }
-      return cur;
-    });
-    return todos;
+  updateTodo(@Body() todo: Todo) {
+    return this.todoService.update(todo);
   }
 
-  @Delete()
-  removeTodo(@Body() body): TypeTodoDTO[] {
-    const mapper = new TodoMapper();
-    const { id } = mapper.removeTodo(body);
-    todos = todos.filter((cur) => cur.id !== id);
-    return todos;
+  @Delete(':id')
+  deleteTodo(
+    @Param(
+      'id',
+      new ParseIntPipe({
+        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
+      }),
+    )
+    id,
+  ) {
+    return this.todoService.delete(id);
   }
 }

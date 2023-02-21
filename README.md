@@ -7,3 +7,4 @@
 - entity pattern으로 변경하기
 - aws s3 셋팅
 - ci setting
+- test

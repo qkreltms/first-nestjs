@@ -1,22 +1,18 @@
 import { TodoService } from 'src/todo/todo.service';
 import { Todo } from 'src/todo/todo.entity';
 import { DataSource } from 'typeorm';
-
-const isDev = true;
+const isDev = process.env.ENV === 'dev';
 const databaseProviders = [
   {
     provide: 'DATA_SOURCE',
     useFactory: () => {
-      // TODO: 권한 관리
-      // env 파일에서 값 받기
-      // entity pattern으로 변경하기
       const appDataSource = new DataSource({
         type: 'postgres',
-        host: 'localhost',
-        port: 5432,
-        username: 'jackpark',
-        password: '',
-        database: 'mydb',
+        host: process.env.DB_HOST,
+        port: Number(process.env.DB_PORT) ?? 5432,
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PW,
+        database: process.env.DB_NAME,
         entities: [Todo],
         logging: isDev,
         synchronize: isDev,
